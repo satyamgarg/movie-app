@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Movie</string>
+    <string name="movie_list">Movie List</string>
+    <string name="failed_to_load_image">Image not found</string>
+    <string name="release_date">Release date</string>
+    <string name="rating">Rating</string>
+    <string name="vote">Vote</string>
+    <string name="genre">Genre</string>
+    <string name="overview">OverView</string>
+    <string name="production_company">Production Company</string>
+    <string name="production_country">Production Country</string>
+    <string name="hash_tag">#</string>
 </resources>
