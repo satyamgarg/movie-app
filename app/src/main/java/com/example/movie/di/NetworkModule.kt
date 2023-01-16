@@ -1,8 +1,11 @@
 package com.example.movie.di
 
 import com.example.movie.BuildConfig
-import com.example.movie.api.MovieService
-import com.example.movie.utils.Constants
+import com.example.movie.domain.repository.IMovieRepository
+import com.example.movie.data.repository.MovieRepository
+import com.example.movie.data.datasource.remote.MovieService
+import com.example.movie.domain.usecase.MovieDetailsUseCase
+import com.example.movie.domain.usecase.MovieListUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,6 +14,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -29,6 +33,8 @@ class NetworkModule {
             .followRedirects(true)
             .followSslRedirects(true)
             .retryOnConnectionFailure(true)
+            .connectTimeout(1, TimeUnit.MINUTES)
+            .readTimeout(30, TimeUnit.SECONDS)
             .also {
                 if (BuildConfig.DEBUG) {
                     it.addInterceptor(provideLoggingInterceptor())
@@ -43,7 +49,7 @@ class NetworkModule {
         okHttpClient: OkHttpClient
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(Constants.API_BASE_URL)
+            .baseUrl(BuildConfig.BASEURL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -53,4 +59,19 @@ class NetworkModule {
     @Singleton
     fun provideMovieService(retrofit: Retrofit): MovieService =
         retrofit.create(MovieService::class.java)
+
+    @Provides
+    fun provideMovieRepository(movieService: MovieService): IMovieRepository {
+        return MovieRepository(movieService)
+    }
+
+    @Provides
+    fun provideMovieListUseCase(movieRepository: MovieRepository): MovieListUseCase {
+        return MovieListUseCase(movieRepository)
+    }
+
+    @Provides
+    fun provideMovieDetailsUseCase(movieRepository: MovieRepository): MovieDetailsUseCase {
+        return MovieDetailsUseCase(movieRepository)
+    }
 }

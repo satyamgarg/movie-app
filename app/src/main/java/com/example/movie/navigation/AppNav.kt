@@ -1,7 +1,7 @@
 package com.example.movie.navigation
 
 import android.net.Uri
-import com.example.movie.ui.movie.MovieActivity
+import com.example.movie.presentation.movie.MovieActivity
 import com.example.movie.utils.Constants
 
 sealed class AppNav(val route: String) {

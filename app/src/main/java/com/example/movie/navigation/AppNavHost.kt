@@ -8,8 +8,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.movie.ui.movie.details.MovieDetailScreen
-import com.example.movie.ui.movie.list.MovieListScreen
+import com.example.movie.presentation.movie.details.MovieDetailScreen
+import com.example.movie.presentation.movie.list.MovieListScreen
 import com.example.movie.utils.Constants
 
 @Composable
