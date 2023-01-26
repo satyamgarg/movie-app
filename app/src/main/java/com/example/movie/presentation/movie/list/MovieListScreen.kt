@@ -15,13 +15,13 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -30,20 +30,19 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.movie.R
 import com.example.movie.data.response.MovieListResponse
-import com.example.movie.navigation.AppNav
-import com.example.movie.presentation.movie.MovieActivity
+import com.example.movie.presentation.movie.list.viewModel.MovieIntent
 import com.example.movie.presentation.movie.list.viewModel.MovieListEvents
 import com.example.movie.presentation.movie.list.viewModel.MoviesListViewModel
 import com.example.movie.utils.Constants
-import com.google.gson.Gson
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
-fun MovieListScreen(viewModel: MoviesListViewModel = hiltViewModel()) {
+fun MovieListScreen(viewModel: MoviesListViewModel = hiltViewModel(), OnMovieClick :(MovieListResponse.Result) -> Unit) {
 
-    val context = LocalContext.current
-
+    LaunchedEffect(key1 = Unit, block = {
+        viewModel.channel.send(MovieIntent.GetMovies)
+    })
 
     Scaffold(
         topBar = {
@@ -59,7 +58,7 @@ fun MovieListScreen(viewModel: MoviesListViewModel = hiltViewModel()) {
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
 
-            when (val state = viewModel.movieListEvent.observeAsState().value) {
+            when (val state = viewModel.movieListEvent.collectAsState().value) {
                 is MovieListEvents.OnMovieListSuccess -> {
                     LazyColumn(
                         modifier = Modifier
@@ -73,13 +72,9 @@ fun MovieListScreen(viewModel: MoviesListViewModel = hiltViewModel()) {
                             state.response?.get(index)?.let { movie ->
 
                                 MovieListItem(movie = movie, onMovieClick = {
-                                    AppNav.MovieDetail.navigate(
-                                        movieActivity = context as MovieActivity,
-                                        movie = Gson().toJson(movie)
-                                    )
+                                    OnMovieClick(movie)
                                 })
                             }
-
                         }
                     }
                 }

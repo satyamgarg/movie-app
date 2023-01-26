@@ -25,7 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +46,7 @@ import com.example.movie.data.response.MovieDetailResponse
 import com.example.movie.data.response.MovieListResponse
 import com.example.movie.presentation.movie.details.viewModel.MovieDetailEvent
 import com.example.movie.presentation.movie.details.viewModel.MoviesDetailViewModel
+import com.example.movie.presentation.movie.list.viewModel.MovieIntent
 import com.example.movie.utils.Constants
 import com.example.movie.utils.DateUtils
 import com.google.gson.Gson
@@ -60,9 +61,9 @@ fun MovieDetailScreen(movieDetails: String, onBackPressed: () -> Unit) {
     val context = LocalContext.current
 
     movie.id?.let { movieId ->
-        moviesDetailViewModel.getMovieDetails(
-            movieId = movieId
-        )
+        LaunchedEffect(key1 = Unit, block = {
+            moviesDetailViewModel.channel.send(MovieIntent.GetMovieDetails(movieId = movieId))
+        })
     } ?: run { onBackPressed() }
 
     LaunchedEffect(key1 = Unit, block = {
@@ -97,7 +98,7 @@ fun MovieDetailScreen(movieDetails: String, onBackPressed: () -> Unit) {
             )
         }
     ) { paddingValues ->
-        when (val response = moviesDetailViewModel.movieDetailsEvent.observeAsState().value) {
+        when (val response = moviesDetailViewModel.movieDetailsEvent.collectAsState().value) {
             is MovieDetailEvent.OnMovieDetailSuccess -> {
 
                 DisplayMovieDetails(paddingValues = paddingValues, movie = response.response)
@@ -136,7 +137,7 @@ fun DisplayMovieDetails(paddingValues: PaddingValues, movie: MovieDetailResponse
             Text(
                 text = stringResource(id = R.string.genre),
                 modifier = Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp),
-                color = Color.White,
+                color = Color.Yellow,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -146,14 +147,12 @@ fun DisplayMovieDetails(paddingValues: PaddingValues, movie: MovieDetailResponse
                 .wrapContentHeight()
                 .padding(start = 10.dp)
         ) {
-            movie.genres?.forEach { obj ->
-                Text(
-                    text = "${obj?.name.orEmpty()}, ",
-                    modifier = Modifier.padding(start = 1.dp),
-                    color = colorResource(id = R.color.off_white),
-                    fontSize = 12.sp
-                )
-            }
+            Text(
+                text = movie.genres?.map { it?.name }.toString(),
+                modifier = Modifier.padding(start = 1.dp),
+                color = colorResource(id = R.color.off_white),
+                fontSize = 12.sp
+            )
         }
 
         Row {
@@ -174,7 +173,9 @@ fun DisplayMovieDetails(paddingValues: PaddingValues, movie: MovieDetailResponse
             if (movie.voteAverage != null) {
                 Text(
                     text = "${stringResource(id = R.string.rating)}\n${movie.voteAverage}",
-                    modifier = Modifier.padding(10.dp).align(Alignment.CenterVertically),
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .align(Alignment.CenterVertically),
                     color = Color.White
                 )
             }
@@ -192,7 +193,7 @@ fun DisplayMovieDetails(paddingValues: PaddingValues, movie: MovieDetailResponse
             Text(
                 text = stringResource(id = R.string.production_company),
                 modifier = Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp),
-                color = Color.White,
+                color = Color.Yellow,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -209,7 +210,8 @@ fun DisplayMovieDetails(paddingValues: PaddingValues, movie: MovieDetailResponse
             Text(
                 text = stringResource(id = R.string.production_country),
                 modifier = Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp),
-                color = colorResource(id = R.color.off_white),
+                color = Color.Yellow,
+                fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
             )
         }
@@ -224,7 +226,7 @@ fun DisplayMovieDetails(paddingValues: PaddingValues, movie: MovieDetailResponse
         Text(
             text = stringResource(id = R.string.overview),
             modifier = Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp),
-            color = Color.White,
+            color = Color.Yellow,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )

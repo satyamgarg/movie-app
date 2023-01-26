@@ -8,4 +8,6 @@ object Constants {
     const val SERVER_DATE_FORMAT = "yyyy-MM-dd"
     const val DATE_FORMAT  = "MMMM dd, yyyy"
     const val NA  = "NA"
+    const val OPR_QUESTION  = "?"
+    const val OPR_AND  = "&"
 }
